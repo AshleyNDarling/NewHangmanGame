@@ -19,7 +19,7 @@ const pics = [noose, upperBody, upperAndLower, oneArm, bothArms, oneLeg, dead];
 const words = ["Morehouse", "Spelman", "Basketball", "Table", "Museum", "Excellent", "Fun", "React",
   "Sunshine", "Rainbow", "Princess", "Diamond", "Glitter", "Butterfly", "Cupcake", "Harmony",
   "Paradise", "Sparkle", "Ballet", "Mermaid", "Galaxy", "Fashion", "Adventure", "Dream",
-  "Bouquet", "Confetti", "Chocolate", "Candle", "Serenade", "Blossom", "Whimsical", "Fantasy"];
+  "Bouquet", "Confetti", "Chocolate ", "Candle", "Serenade", "Blossom", "Whimsical", "Fantasy"];
 const wordHints = {"Morehouse": "A historically Black college in Atlanta.",
   "Spelman": "A women's college in Atlanta, known for its strong liberal arts program.",
   "Basketball": "A sport involving two teams of five players each.",
@@ -120,7 +120,7 @@ class HangmanGame extends React.Component {
   handleNameSubmit = (e) => {
     e.preventDefault();
     if(this.state.playerName.trim() !== ""){
-      this.setState({nameSubmitted: true}, () => {
+      this.setState({nameSubmitted: false}, () => {
         this.startNewGame();
         this.fetchPlayerStats();
       });
@@ -165,19 +165,7 @@ class HangmanGame extends React.Component {
     
   };
 
-
-  handleHintClick = () => {
-    const { wordHints, curWord } = this.state;
-    const selectedWord = this.state.wordList[curWord]; // Assuming wordList and curWord are properly set.
-    const hint = wordHints[selectedWord.toUpperCase()];
-
-    if(this.state.hintUsed){
-      console.log('You already use the hint!');
-      return;
-    }
-  
-
-   submitGameResult = async (customerName, didWin) => {
+  submitGameResult = async (customerName, didWin) => {
     try {
       const response = await fetch('http://localhost:3001/api/game-result', {
         method: 'POST',
@@ -195,16 +183,19 @@ class HangmanGame extends React.Component {
     }
    };
 
-   getCustomerStats = async (customerName) => {
-    try {
-      const response = await fetch('http://localhost:3001/api/customer-stats/${customerName');
-      const data = await response.json();
-      console.log('Stats:', data);
-      return data;
-    } catch(error){
-      console.error('Error fetching customer stats:', error);
+  handleHintClick = () => {
+    const { curWord, wordList, hintUsed } = this.state;
+    const selectedWord = wordList[curWord]; // Assuming wordList and curWord are properly set.
+    const hint = wordHints[selectedWord.toUpperCase()];
+
+    if(hintUsed){
+      console.log('You already use the hint!');
+      return;
     }
-   };
+  
+
+   const currentHint = wordHints[selectedWord];
+
 
 
     // Check if a hint exists for the selected word and log it in the console
@@ -217,7 +208,21 @@ class HangmanGame extends React.Component {
 
 
   };
-  
+  fetchPlayerStats = async () => {
+    const { playerName } = this.state;
+    try {
+      const response = await fetch('http://localhost:3001/api/customer-stats/${customerName');
+      const data = await response.json();
+      //console.log('Stats:', data);
+
+      this.setState({
+        stats: data,
+      });
+      
+    } catch(error){
+      console.error('Error fetching customer stats:', error);
+    }
+   };
   
  /* restartGame = () => {
     this.setState({
@@ -305,8 +310,13 @@ class HangmanGame extends React.Component {
     handleNameSubmit = (e) => {
       e.preventDefault();
       if(this.state.playerName.trim() !== ""){
-        this.startNewGame();
-        this.fetchPlayerStats?.();
+        this.setState({nameSubmitted: true}, () => {
+          
+          this.startNewGame();
+          this.fetchPlayerStats();
+        });
+
+        
        
       }
     };
@@ -336,7 +346,7 @@ class HangmanGame extends React.Component {
       const { word, revealedLetters, lifeLeft, gameOver } = this.state;
       const gameWon = revealedLetters.every(letter => letter !== '_');
 
-      if(!nameSubmitted) {
+      if(!this.state.nameSubmitted) {
         return (
 
           <div className="player-name-input">
@@ -344,7 +354,7 @@ class HangmanGame extends React.Component {
             <form onSubmit={this.handleNameSubmit}>
               <input
                 type="text"
-                value={playerName}
+                value={this.state.playerName}
                 onChange={(e) => this.setState({playerName: e.target.value})}
                 placeholder="Your name"
                 required
@@ -404,14 +414,16 @@ class HangmanGame extends React.Component {
             </button>
           </div>
 
+
+        {this.state.stats && (    
           <div className="stats">
-
             <h3>Player Stats</h3>
-            <p>Games Played: {stats.gamesPlayed}</p>
-            <p>Games Won: {stats.gamesWon}</p>
-            <p>Win Percentage: {stats.winPercentage}%</p>
+            <p>Games Played: {this.state.stats.gamesPlayed}</p>
+            <p>Games Won: {this.state.stats.gamesWon}</p>
+            <p>Win Percentage: {this.state.stats.winPercentage}%</p>
 
-          </div>
+          </div>   )}
+         
         </div>
       );
     }
