@@ -2,7 +2,7 @@ import './App.css';
 import React from 'react';
 import LetterBox from './LetterBox';
 import SingleLetterSearchbar from './SingleLetterSearchBar';
-
+import React, { useState, useEffect } from 'react';
 
 import noose from './assests/noose.png';
 import upperBody from './assests/upperbody.png';
@@ -13,6 +13,7 @@ import bothArms from './assests/botharms.png';
 import dead from './assests/Dead.png';
 
 
+const [hint, setHint] = useState('');
 
 
 const pics = [noose, upperBody, upperAndLower, oneArm, bothArms, oneLeg, dead];
@@ -129,6 +130,7 @@ class HangmanGame extends React.Component {
 
 
   startNewGame = () => {
+    const randomWord = getRandomWord();
     const randomIndex = Math.floor(Math.random() * this.state.wordList.length);
     const newWord = this.state.wordList[randomIndex].toUpperCase();
     //const newWord = this.state.wordList[randomIndex].toUpperCase(); 
@@ -159,6 +161,11 @@ class HangmanGame extends React.Component {
     } else {
       console.error('Invalid word index or empty WordList' );
     }
+
+    setSelectedWord(randomWord);
+    setGuesses([]);
+    setWrongGuesses([]);
+    setHint(wordHints[randomWord]);
 
 
 
@@ -396,7 +403,15 @@ class HangmanGame extends React.Component {
               />
             ))}
           </div>
-  
+
+          <div >
+                <div style={{ display: 'flex' }}>
+                    {letterComponents}
+                </div>
+                
+            </div>
+
+            
           <SingleLetterSearchbar onSearch={this.handleLetterGuess} gameOver={gameOver} />
           {this.state.hintUsed && <p><strong>Hint:</strong> {this.state.hint}</p>}
 
